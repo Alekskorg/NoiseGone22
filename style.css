@@ -1,0 +1,24 @@
+:root{
+  --primary:#6c63ff;
+  --bg:#e9f0ff;
+  --radius:12px;
+  --transition:.2s;
+  font-family:Inter,Arial,sans-serif;
+}
+body{margin:0;background:var(--bg);}
+.container{max-width:640px;margin:40px auto;padding:20px;background:#fff;border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.1);}
+h1{margin:0 0 8px;}
+.sub{margin:0 0 24px;color:#555;}
+
+.dropzone{border:2px dashed var(--primary);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:background var(--transition);}
+.dropzone.hover{background:rgba(108,99,255,.08);}
+.formats{font-size:.9rem;color:#777;margin:8px 0 0;}
+
+.btn{margin:24px 8px 0;padding:8px 24px;border:none;border-radius:var(--radius);background:var(--primary);color:#fff;cursor:pointer;opacity:.7;transition:opacity var(--transition);}
+.btn[disabled]{cursor:default;opacity:.3;}
+.btn:not([disabled]):hover{opacity:1;}
+
+.progress{margin-top:16px;background:#ddd;border-radius:var(--radius);height:8px;overflow:hidden;}
+#progressBar{height:100%;width:0;background:var(--primary);transition:width .1s;}
+
+.fileInfo{margin-top:12px;color:#333;font-size:.9rem;}
