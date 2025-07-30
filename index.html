@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NoiseGone – Noise Remover</title>
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#6c63ff">
+  <link rel="icon" href="/favicon.ico">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>NoiseGone</h1>
+    <p class="sub" data-i18n="subtitle"></p>
+
+    <!-- dropzone -->
+    <div id="dropzone" class="dropzone" tabindex="0" aria-describedby="hint">
+      <p id="hint" data-i18n="dropMessage"></p>
+      <p class="formats" data-i18n="dropFormats"></p>
+      <input type="file" id="fileInput" accept=".wav,.mp3,.m4a" hidden>
+    </div>
+    <p id="fileInfo" class="fileInfo"></p>
+
+    <button id="cleanBtn" class="btn" disabled data-i18n="btnClean"></button>
+
+    <!-- progress -->
+    <div id="progressWrap" class="progress" hidden>
+      <div id="progressBar"></div>
+    </div>
+
+    <!-- result -->
+    <div id="result" hidden>
+      <p data-i18n="done"></p>
+      <button id="downloadBtn" class="btn" data-i18n="btnDownload"></button>
+      <button id="newBtn" class="btn" data-i18n="btnNew"></button>
+    </div>
+  </main>
+
+  <script src="/main.js" defer></script>
+  <script src="/sw.js" defer></script>
+</body>
+</html>
