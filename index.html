@@ -1,438 +1,60 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NoiseGone — удаление шума онлайн</title>
-  <link rel="manifest" href="/manifest.webmanifest">
-<meta name="color-scheme" content="light dark">
-<style>
-  :root{
-    --bg:#f4f6ff;
-    --card:#ffffff;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --brand:#4f46e5;
-    --brand-600:#4338ca;
-    --ok:#22c55e;
-    --ok-600:#16a34a;
-    --ring:#c7d2fe;
-    --chip:#eef2ff;
-    --chip-text:#3730a3;
-    --border:#e5e7eb;
-    --dash:#b7c3f3;
-  }
-  *{box-sizing:border-box}
-  body{
-    <header class="site-header">
-  <a class="brand" href="/" aria-label="NoiseGone">
-    <img src="/logo-full.svg" alt="NoiseGone logo" height="40">
-  </a>
-</header>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NoiseGone — Noise Remover</title>
 
-    margin:0; font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color:var(--text); background:linear-gradient(180deg,#eef2ff, #f8fafc 45%, #f4f6ff);
-  }
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#6c63ff" />
 
-  /* Top bar */
-  .topbar{
-    position:sticky; top:0; z-index:5;
-    backdrop-filter:saturate(180%) blur(6px);
-    background:rgba(248,250,252,.7); border-bottom:1px solid var(--border);
-  }
-  .nav{
-    max-width:1180px; margin:0 auto; padding:10px 16px;
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-  }
-  .logo{
-    display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text);
-    min-width:180px;
-  }
-  .logo img{height:28px; width:auto; display:block;}
-  .logo b{font-size:18px}
-  .nav-links{display:flex; gap:18px; flex:1 1 420px; min-width:260px; flex-wrap:wrap}
-  .nav-links a{color:var(--muted); text-decoration:none; font-weight:600}
-  .nav-links a:hover{color:var(--text)}
-  .chips{display:flex; gap:10px; flex-wrap:wrap}
-  .chip{
-    background:var(--chip); color:var(--chip-text);
-    padding:8px 12px; border-radius:999px; font-weight:600; white-space:nowrap;
-    border:1px solid var(--ring);
-  }
+  <!-- Иконка сайта (svg). Если favicon.ico нет — НИЧЕГО на него не ссылаемся -->
+  <link rel="icon" href="/logo-icon.svg" type="image/svg+xml" />
 
-  /* Card */
-  .wrap{max-width:1180px; margin:28px auto; padding:0 16px}
-  .card{
-    background:var(--card); border-radius:20px; box-shadow:0 20px 60px rgba(80,90,190,.12);
-    padding:28px; overflow:hidden;
-  }
-  .card-head{display:flex; align-items:center; justify-content:space-between; gap:12px}
-  .title{font-size:28px; font-weight:800; margin:18px 0 4px}
-  .subtitle{color:var(--muted); margin:0 0 14px}
-
-  /* i18n select */
-  .lang{
-    display:inline-flex; gap:8px; align-items:center;
-    background:#f8fafc; border:1px solid var(--border);
-    padding:6px 10px; border-radius:10px;
-  }
-  .lang select{border:0; background:transparent; font-weight:700}
-
-  /* Presets */
-  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 16px}
-  .pill{
-    padding:9px 14px; border-radius:10px; border:1px solid var(--border);
-    background:#fff; cursor:pointer; font-weight:600; color:var(--muted);
-  }
-  .pill.active{background:var(--brand); border-color:var(--brand); color:#fff}
-
-  /* Dropzone */
-  .drop{
-    border:2px dashed var(--dash); border-radius:14px; padding:34px; text-align:center;
-    color:var(--muted); transition:.15s; background:#fbfdff;
-  }
-  .drop.hover{background:#f3f6ff; border-color:var(--brand)}
-  .hint-1{font-weight:700; color:var(--text); margin-bottom:4px}
-  .hint-2{font-size:14px}
-
-  .fileline{
-    margin-top:16px; display:flex; justify-content:center; gap:10px; align-items:center;
-    color:var(--text);
-  }
-  .fname{max-width:380px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-
-  /* Actions */
-  .actions{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 8px}
-  .btn{
-    border:0; border-radius:12px; padding:12px 18px; font-weight:700; cursor:pointer;
-    background:#eef1ff; color:#3730a3;
-  }
-  .btn-secondary{background:#eef0f3; color:#1f2937}
-  .btn-primary{background:var(--ok); color:#fff}
-  .btn-primary:hover{background:var(--ok-600)}
-  .btn:disabled{opacity:.5; cursor:not-allowed}
-
-  /* Progress */
-  .bar-wrap{height:10px; background:#edf2ff; border-radius:999px; overflow:hidden}
-  .bar{height:100%; width:0; background:linear-gradient(90deg,#34d399,#22c55e 55%,#16a34a)}
-  .status{min-height:22px; color:var(--muted); margin-top:8px}
-
-  /* Download */
-  .download{display:none; margin-top:10px}
-  .download a{font-weight:800; color:var(--brand); text-decoration:none;}
-  .download a:hover{color:var(--brand-600)}
-
-  footer{color:var(--muted); font-size:14px; text-align:center; margin:24px 0 30px}
-  @media (max-width:720px){
-    .nav{gap:10px}
-    .nav-links{order:3}
-  }
-</style>
-  <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/logo-icon.svg" type="image/svg+xml">
-
+  <!-- Шрифт + стили -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <header class="site-header">
-  <a class="brand" href="/" aria-label="NoiseGone">
-    <img src="/logo-full.svg" alt="NoiseGone logo" height="40">
-  </a>
-</header>
+  <!-- HEADER с логотипом -->
+  <header class="site-header" style="display:flex;align-items:center;gap:12px;padding:16px 20px;">
+    <a href="/" class="brand" aria-label="NoiseGone">
+      <img src="/logo-full.svg" alt="NoiseGone logo" height="40" />
+    </a>
+  </header>
 
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="nav">
-      <a class="logo" href="/">
-        <img src="logo.svg" alt="NoiseGone">
-        <b>NoiseGone</b>
-      </a>
-      <div class="nav-links">
-        <a href="#">Audio Enhancer</a>
-        <a href="#">Noise Remover</a>
-        <a href="#">Vocal Remover</a>
-        <a href="#">Echo Remover</a>
-        <a href="#">Тарифы</a>
-      </div>
-      <div class="chips">
-        <span class="chip" data-i="chip60">60 мин/мес — $10</span>
-        <span class="chip" data-i="chip300">300 мин/мес — $45</span>
-        <span class="chip" data-i="chipUnlim">Безлимит/мес — $90</span>
-      </div>
+  <!-- MAIN -->
+  <main class="container">
+    <!-- h1 прячем визуально, но оставляем для доступности -->
+    <h1 style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">NoiseGone</h1>
+    <p class="sub" data-i18n="subtitle"></p>
+
+    <!-- dropzone -->
+    <div id="dropzone" class="dropzone" tabindex="0" aria-describedby="hint">
+      <p id="hint" data-i18n="dropMessage"></p>
+      <p class="formats" data-i18n="dropFormats"></p>
+      <input type="file" id="fileInput" accept=".wav,.mp3,.m4a" hidden />
     </div>
-  </div>
+    <p id="fileInfo" class="fileInfo"></p>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="card-head">
-        <div>
-          <h1 class="title">NoiseGone</h1>
-          <p class="subtitle" data-i="subtitle">Загрузите аудиофайл, и мы удалим шум</p>
-        </div>
-        <div class="lang">
-          <span>🌐</span>
-          <select id="lang">
-            <option value="ru">RU</option>
-            <option value="en">EN</option>
-            <option value="de">DE</option>
-          </select>
-        </div>
-      </div>
+    <button id="cleanBtn" class="btn" disabled data-i18n="btnClean"></button>
 
-      <div class="presets" id="presets">
-        <button class="pill active"  data-preset="podcast"  data-i="p_podcast">Подкаст</button>
-        <button class="pill"         data-preset="interview" data-i="p_interview">Интервью</button>
-        <button class="pill"         data-preset="voiceover" data-i="p_voice">Дубляж</button>
-        <button class="pill"         data-preset="field"     data-i="p_field">Полевые</button>
-      </div>
-
-      <div id="drop" class="drop" role="button" tabindex="0" aria-label="file drop zone">
-        <div class="hint-1" data-i="drop1">Перетащите файл сюда или выберите</div>
-        <div class="hint-2" data-i="drop2">WAV, MP3, M4A до 50 MB</div>
-        <input id="file" type="file" accept="audio/*" style="display:none">
-        <div id="fileline" class="fileline" hidden>
-          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4f46e5" d="M12 2l9 7v13H3V9l9-7zm0 2.4L5 10v9h14v-9l-7-5.6z"/></svg>
-          <span class="fname" id="fname"></span>
-          <span class="muted" id="fsize" style="color:#6b7280"></span>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn" id="recBtn" disabled data-i="rec">Запись</button>
-        <button class="btn btn-secondary" id="resetBtn" data-i="reset">Сбросить</button>
-        <button class="btn btn-primary" id="goBtn" disabled data-i="clean">Очистить шум</button>
-      </div>
-
-      <div class="bar-wrap" aria-hidden="true"><div id="bar" class="bar"></div></div>
-      <div class="status" id="status"></div>
-
-      <div class="download" id="dlWrap">
-        <a id="dl" href="#" download="cleaned.mp3" data-i="download">Скачать очищенный файл</a>
-      </div>
+    <!-- progress -->
+    <div id="progressWrap" class="progress" hidden>
+      <div id="progressBar"></div>
     </div>
-  </div>
 
-  <footer>
-    © 2025 NoiseGone • <a href="mailto:support@noisegone.app">support@noisegone.app</a>
-  </footer>
+    <!-- result -->
+    <div id="result" hidden>
+      <p data-i18n="done"></p>
+      <button id="downloadBtn" class="btn" data-i18n="btnDownload"></button>
+      <button id="newBtn" class="btn" data-i18n="btnNew"></button>
+    </div>
+  </main>
 
-<script>
-(function(){
-  /* ====================== I18N ====================== */
-  const T = {
-    ru:{
-      subtitle:'Загрузите аудиофайл, и мы удалим шум',
-      p_podcast:'Подкаст', p_interview:'Интервью', p_voice:'Дубляж', p_field:'Полевые',
-      drop1:'Перетащите файл сюда или выберите',
-      drop2:'WAV, MP3, M4A до 50 MB',
-      rec:'Запись', reset:'Сбросить', clean:'Очистить шум',
-      downloading:'Скачать очищенный файл',
-      chip60:'60 мин/мес — $10', chip300:'300 мин/мес — $45', chipUnlim:'Безлимит/мес — $90',
-      processing:'Идёт обработка…', done:'Готово! Нажмите «Скачать».',
-      err:'Ошибка обработки', net:'Сетевая ошибка'
-    },
-    en:{
-      subtitle:"Upload an audio file and we’ll remove the noise",
-      p_podcast:'Podcast', p_interview:'Interview', p_voice:'Voice-over', p_field:'Field',
-      drop1:'Drag & drop here or click to choose',
-      drop2:'WAV, MP3, M4A up to 50 MB',
-      rec:'Record', reset:'Reset', clean:'Clean noise',
-      downloading:'Download cleaned file',
-      chip60:'60 min/mo — $10', chip300:'300 min/mo — $45', chipUnlim:'Unlimited/mo — $90',
-      processing:'Processing…', done:'Done! Click “Download”.',
-      err:'Processing error', net:'Network error'
-    },
-    de:{
-      subtitle:'Laden Sie eine Audiodatei hoch – wir entfernen das Rauschen',
-      p_podcast:'Podcast', p_interview:'Interview', p_voice:'Voice-over', p_field:'Field',
-      drop1:'Datei hierher ziehen oder klicken, um zu wählen',
-      drop2:'WAV, MP3, M4A bis 50 MB',
-      rec:'Aufnahme', reset:'Zurücksetzen', clean:'Rauschen entfernen',
-      downloading:'Bereinigte Datei herunterladen',
-      chip60:'60 Min/Monat — $10', chip300:'300 Min/Monat — $45', chipUnlim:'Unlimitiert/Monat — $90',
-      processing:'Wird verarbeitet…', done:'Fertig! „Herunterladen“ klicken.',
-      err:'Verarbeitungsfehler', net:'Netzwerkfehler'
-    }
-  };
-  const $ = (q,root=document)=>root.querySelector(q);
-  const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
-
-  const langSel = $('#lang');
-  const ui = {
-    subtitle: $('[data-i="subtitle"]'),
-    drop1: $('[data-i="drop1"]'),
-    drop2: $('[data-i="drop2"]'),
-    rec: $('[data-i="rec"]'),
-    reset: $('[data-i="reset"]'),
-    clean: $('[data-i="clean"]'),
-    chips:{
-      chip60: $('[data-i="chip60"]') || $('[data-i="chip60"]'),
-      chip300: $('[data-i="chip300"]') || $('[data-i="chip300"]'),
-      chipUnlim: $('[data-i="chipUnlim"]') || $('[data-i="chipUnlim"]'),
-    },
-    download: $('[data-i="download"]'),
-    pills: {
-      p_podcast: $('[data-i="p_podcast"]'),
-      p_interview: $('[data-i="p_interview"]'),
-      p_voice: $('[data-i="p_voice"]'),
-      p_field: $('[data-i="p_field"]')
-    }
-  };
-
-  let lang = localStorage.getItem('ng_lang') || 'ru';
-  let preset = localStorage.getItem('ng_preset') || 'podcast';
-  let fileObj = null;
-
-  function applyLang(){
-    langSel.value = lang;
-    const L = T[lang];
-    ui.subtitle.textContent = L.subtitle;
-    ui.drop1.textContent  = L.drop1;
-    ui.drop2.textContent  = L.drop2;
-    ui.rec.textContent    = L.rec;
-    ui.reset.textContent  = L.reset;
-    ui.clean.textContent  = L.clean;
-    ui.download.textContent = L.downloading;
-    $('[data-i="chip60"]').textContent   = L.chip60;
-    $('[data-i="chip300"]').textContent  = L.chip300;
-    $('[data-i="chipUnlim"]').textContent= L.chipUnlim;
-    ui.pills.p_podcast.textContent   = L.p_podcast;
-    ui.pills.p_interview.textContent = L.p_interview;
-    ui.pills.p_voice.textContent     = L.p_voice;
-    ui.pills.p_field.textContent     = L.p_field;
-  }
-
-  /* ====================== Presets ====================== */
-  const presetBtns = $$('#presets .pill');
-  function setPreset(p){
-    preset = p; localStorage.setItem('ng_preset',preset);
-    presetBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.preset===preset));
-  }
-
-  /* ====================== Dropzone ====================== */
-  const drop = $('#drop'), fileInput = $('#file');
-  const fileline = $('#fileline'), fname = $('#fname'), fsize = $('#fsize');
-  const goBtn = $('#goBtn'), resetBtn = $('#resetBtn');
-  const bar = $('#bar'), status = $('#status'), dlWrap=$('#dlWrap'), dl=$('#dl');
-
-  function bytes(n){
-    const u=['B','KB','MB','GB']; let i=0,v=n;
-    while(v>=1024&&i<u.length-1){v/=1024;i++}
-    return v.toFixed(1)+' '+u[i];
-  }
-  function showFile(){
-    if(!fileObj){
-      fileline.hidden = true; goBtn.disabled = true;
-      return;
-    }
-    fname.textContent = fileObj.name;
-    fsize.textContent = '('+bytes(fileObj.size)+')';
-    fileline.hidden = false; goBtn.disabled = false;
-  }
-  drop.addEventListener('click',()=>fileInput.click());
-  drop.addEventListener('dragover',e=>{e.preventDefault(); drop.classList.add('hover')});
-  drop.addEventListener('dragleave',()=>drop.classList.remove('hover'));
-  drop.addEventListener('drop',e=>{
-    e.preventDefault(); drop.classList.remove('hover');
-    const f=e.dataTransfer.files?.[0]; if(!f) return;
-    fileObj=f; showFile();
-  });
-  fileInput.addEventListener('change',()=>{
-    if(fileInput.files?.[0]){ fileObj=fileInput.files[0]; showFile(); }
-  });
-
-  /* ====================== Actions ====================== */
-  resetBtn.addEventListener('click', ()=>{
-    fileInput.value=''; fileObj=null; showFile();
-    bar.style.width='0%'; status.textContent=''; dlWrap.style.display='none';
-  });
-
-  // (Запись в браузере отключена по умолчанию; включим позже)
-  $('#recBtn').addEventListener('click', ()=>alert('Запись микрофона добавим позже 🙂'));
-
-  function fallbackProgress(start=55, end=95){
-    let val=start;
-    const id=setInterval(()=>{
-      val=Math.min(val+1,end);
-      bar.style.width=val+'%';
-      if(val>=end) clearInterval(id);
-    },250);
-    return ()=>clearInterval(id);
-  }
-
-  goBtn.addEventListener('click', ()=>{
-    if(!fileObj) return;
-    goBtn.disabled=true; resetBtn.disabled=true;
-    const L=T[lang];
-    status.textContent=L.processing; dlWrap.style.display='none';
-    bar.style.width='0%';
-
-    const form = new FormData();
-    form.append('file', fileObj);
-    form.append('preset', preset);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST','/api/clean');
-    xhr.responseType='blob';
-    xhr.timeout = 240000;
-
-    let stopFallback = null;
-
-    xhr.upload.onprogress = e=>{
-      if(e.lengthComputable){
-        const p = Math.round((e.loaded/e.total)*50);
-        bar.style.width = p+'%';
-      }
-    };
-    xhr.upload.onload = ()=>{ stopFallback=fallbackProgress(55,95); };
-
-    xhr.onprogress = e=>{
-      if(e.lengthComputable){
-        if(stopFallback) stopFallback();
-        const p = 50 + Math.round((e.loaded/e.total)*50);
-        bar.style.width = p+'%';
-      }
-    };
-
-    xhr.onload = ()=>{
-      if(stopFallback) stopFallback();
-      goBtn.disabled=false; resetBtn.disabled=false;
-      bar.style.width='100%';
-
-      if(xhr.status!==200){
-        status.textContent=L.err+' ('+xhr.status+')';
-        return;
-      }
-      const type = xhr.getResponseHeader('Content-Type') || '';
-      if(type.includes('text')){
-        const r=new FileReader();
-        r.onload=()=>status.textContent=r.result||L.err;
-        r.readAsText(xhr.response);
-        return;
-      }
-      const cd = xhr.getResponseHeader('Content-Disposition') || '';
-      const m  = cd.match(/filename\*?=(?:UTF-8''|")?([^\";]+)/i);
-      const name = m ? decodeURIComponent(m[1]) : 'cleaned.mp3';
-
-      const url = URL.createObjectURL(xhr.response);
-      dl.href=url; dl.setAttribute('download', name);
-      dlWrap.style.display='block';
-      status.textContent=L.done;
-    };
-
-    xhr.onerror = ()=>{ if(stopFallback) stopFallback(); goBtn.disabled=false; resetBtn.disabled=false; status.textContent=T[lang].net; };
-    xhr.ontimeout= ()=>{ if(stopFallback) stopFallback(); goBtn.disabled=false; resetBtn.disabled=false; status.textContent=T[lang].net+' (timeout)'; };
-
-    xhr.send(form);
-  });
-
-  /* ====================== Boot ====================== */
-  presetBtns.forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
-  setPreset(preset);
-  langSel.value=lang; applyLang();
-  langSel.addEventListener('change',()=>{ lang=langSel.value; localStorage.setItem('ng_lang',lang); applyLang(); });
-})();
-</script>
+  <!-- SCRIPTS -->
+  <script src="/main.js" defer></script>
+  <script src="/sw.js" defer></script>
 </body>
 </html>
-
-
